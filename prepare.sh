@@ -39,8 +39,7 @@ if [ -d "$venv_path" ]; then
   echo "$venv_path directory already exists. Would you like to delete it and create a new Python virtual environment from scratch? Enter Y to continue"
   read -r answer
 
-    if [ "$answer" = 'Y' ]
-    then
+    if [ "$answer" = 'Y' ]; then
       # rm is a scary function, but here it will ask about deletion
       rm -r -d "$venv_path"
       python -m venv "$venv_path"
@@ -58,7 +57,7 @@ ch_folder=$(trim_text $CH_FOLDER)
 ch_path="$HOME/$ch_folder"
 
 if [ -d "$ch_path" ]; then
-  echo "$ch_path directory already exists. Would you like to update its contents from git? Enter Y if agree, otherwise script will terminate: "
+  echo "$ch_path directory already exists. Would you like to update its contents from git?  Enter Y to continue: "
   read -r answer
     if [ "$answer" = 'Y' ]; then
       # git -C is for executing command without changing the working directory
@@ -72,8 +71,14 @@ if [ -d "$ch_path" ]; then
     fi
 
   else
+    echo "Creating directory $ch_path"
     mkdir "$ch_path"
     git init "$ch_path"
     git -C "$ch_path" pull $REPO_URL
 fi
+echo "Switching to develop branch"
+git -C "$ch_path" checkout develop
 
+echo "Activating Python environment"
+source "$venv_path/bin/activate"
+pip install -r "$ch_path/euler_requirements.txt"
