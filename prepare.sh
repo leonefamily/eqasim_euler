@@ -36,8 +36,8 @@ venv_path="$HOME/$venv_name"
 echo "Attempting to create a new Python virtual environment at path: $venv_path"
 
 if [ -d "$venv_path" ]; then
-  echo "$venv_path directory already exists. Would you like to delete it and create a new Python virtual environment from scratch?"
-  read -r "Enter Y/N: " answer
+  echo "$venv_path directory already exists. Would you like to delete it and create a new Python virtual environment from scratch? Enter Y to continue"
+  read -r answer
 
     if [ "$answer" = 'Y' ]
     then
