@@ -20,7 +20,8 @@ env2lmod="/cluster/apps/local/env2lmod.sh"
 trim_text () {
   # remove all whitespaces from start and end using regular expressions
   local text="$1"
-  local trimmed=$(echo "$text" | sed 's/^[   ]*//;s/[    ]*$//')
+  local trimmed
+  trimmed=$(echo "$text" | sed 's/^[   ]*//;s/[    ]*$//')
   echo "$trimmed"
 }
 
@@ -40,8 +41,8 @@ if [ -d "$venv_path" ]; then
   read -r answer
 
     if [ "$answer" = 'Y' ]; then
-      # rm is a scary function, but here it will ask about deletion
-      rm -r -d "$venv_path"
+      # rm is a scary function
+      rm -rf "$venv_path"
       python -m venv "$venv_path"
     else
       echo "Did not get positive (Y) answer, exiting"
@@ -57,14 +58,12 @@ ch_folder=$(trim_text $CH_FOLDER)
 ch_path="$HOME/$ch_folder"
 
 if [ -d "$ch_path" ]; then
-  echo "$ch_path directory already exists. Would you like to update its contents from git?  Enter Y to continue: "
+  echo "$ch_path directory already exists. Would you like to remove its contents and clone git?  Enter Y to continue: "
   read -r answer
     if [ "$answer" = 'Y' ]; then
       # git -C is for executing command without changing the working directory
-      if [ "$(git -C "$ch_path" rev-parse)" != "0" ]; then
-        git init "$ch_path"
-      fi
-      git -C "$ch_path" clone -b develop --single-branch $REPO_URL
+      rm -rf "$ch_path"
+      git -C "$ch_path" clone $REPO_URL -b develop --single-branch
     else
       echo "Did not get positive (Y) answer, exiting"
       exit 1
@@ -74,9 +73,9 @@ if [ -d "$ch_path" ]; then
     echo "Creating directory $ch_path"
     mkdir "$ch_path"
     git init "$ch_path"
-    git -C "$ch_path" clone -b develop --single-branch $REPO_URL
+    git -C "$ch_path" clone $REPO_URL -b develop --single-branch
 fi
 
 echo "Activating Python environment"
 source "$venv_path/bin/activate"
-pip install -r "$ch_path/euler_requirements.txt"
+pip install -r "$ch_path/ch-zh-synpop/euler_requirements.txt"
