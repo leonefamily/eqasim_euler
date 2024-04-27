@@ -15,6 +15,8 @@ CH_FOLDER="ch"
 # Remote Eqasim's repository URL
 REPO_URL="https://gitlab.ethz.ch/ivt-vpl/populations/ch-zh-synpop.git"
 
+env2lmod="/cluster/apps/local/env2lmod.sh"
+
 trim_text () {
   # remove all whitespaces from start and end using regular expressions
   local text="$1"
@@ -23,11 +25,11 @@ trim_text () {
 }
 
 echo "Ensuring Euler's new environment usage"
-env2lmod
+$env2lmod
 
 echo "Enabling GCC and Python modules"
-"module load gcc/$GCC_VERSION"
-"module load python/$PYTHON_VERSION"
+module load "gcc/$GCC_VERSION"
+module load "python/$PYTHON_VERSION"
 
 venv_name=$(trim_text $VENV_NAME)
 venv_path="$HOME/$venv_name"
@@ -50,16 +52,19 @@ if [ -d "$venv_path" ]; then
   else
      python -m venv "$venv_path"
 fi
+echo "Python virtual environment is in order"
 
 ch_folder=$(trim_text $CH_FOLDER)
 ch_path="$HOME/$ch_folder"
 
 if [ -d "$ch_path" ]; then
-  echo "$ch_path directory already exists. Would you like to update its contents from git?"
-  read -r "Enter Y/N: " answer
-    if [ "$answer" = 'Y' ]
-    then
-      # -C is for executing command without changing the working directory
+  echo "$ch_path directory already exists. Would you like to update its contents from git? Enter Y if agree, otherwise script will terminate: "
+  read -r answer
+    if [ "$answer" = 'Y' ]; then
+      # git -C is for executing command without changing the working directory
+      if [ "$(git -C "$ch_path" rev-parse)" != "0" ]; then
+        git init "$ch_path"
+      fi
       git -C "$ch_path" pull $REPO_URL
     else
       echo "Did not get positive (Y) answer, exiting"
@@ -67,6 +72,8 @@ if [ -d "$ch_path" ]; then
     fi
 
   else
-     git -C "$ch_path" pull $REPO_URL
+    mkdir "$ch_path"
+    git init "$ch_path"
+    git -C "$ch_path" pull $REPO_URL
 fi
 
