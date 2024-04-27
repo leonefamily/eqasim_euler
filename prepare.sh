@@ -64,7 +64,7 @@ if [ -d "$ch_path" ]; then
       if [ "$(git -C "$ch_path" rev-parse)" != "0" ]; then
         git init "$ch_path"
       fi
-      git -C "$ch_path" fetch $REPO_URL develop
+      git -C "$ch_path" clone -b develop --single-branch $REPO_URL
     else
       echo "Did not get positive (Y) answer, exiting"
       exit 1
@@ -74,7 +74,7 @@ if [ -d "$ch_path" ]; then
     echo "Creating directory $ch_path"
     mkdir "$ch_path"
     git init "$ch_path"
-    git -C "$ch_path" fetch $REPO_URL develop
+    git -C "$ch_path" clone -b develop --single-branch $REPO_URL
 fi
 
 echo "Activating Python environment"
