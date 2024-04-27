@@ -62,7 +62,7 @@ if [ -d "$ch_path" ]; then
   read -r answer
     if [ "$answer" = 'Y' ]; then
       # git -C is for executing command without changing the working directory
-      rm -rf "$ch_path"
+      rm -rf "${ch_path:?}/*"
       git -C "$ch_path" clone $REPO_URL -b develop --single-branch
     else
       echo "Did not get positive (Y) answer, exiting"
