@@ -1,44 +1,19 @@
 #!/bin/bash
 # @author : leonefamily
 
-# * * * * * * * * * * * * * * * * * * * * * * *
-# * !! AVOID EMPTY VARIABLES AT ALL COSTS !!  *
-# *  You may accidentally nuke your home di-  *
-# * !!        rectory into oblivion       !!  *
-# * * * * * * * * * * * * * * * * * * * * * * *
-
 # exit on any error
 set -e
 
-# C compiler version
-GCC_VERSION="8.2.0"
-# Python interpreter version
-PYTHON_VERSION="3.10.4"
-# Name of the folder, where Python virtual environment will reside
-VENV_NAME="venv"
-# Name of the folder, that will contain the Equasim pipeline code
-CH_FOLDER="ch"
-# Remote Eqasim's repository URL
-REPO_URL="https://gitlab.ethz.ch/ivt-vpl/populations/ch-zh-synpop.git"
-# Get the location of this script
+# Get the location of this script and jump to its location
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# Name of folder with data for simulation
-DATA_FOLDER="switzerland_data"
+cd "$SCRIPT_DIR"
+
+# importing variables and functions
+source variables.sh
+source utils.sh
 
 # extract repository name from the last part independently on the fact whether it ends with .git or not
-repo_name=$(basename $REPO_URL | sed 's/\.git$//')
-if [ -z "$repo_name" ]; then
-  echo "Repository name couldn't be extracted. Invalid repository URL?"
-  exit 1
-fi
-
-trim_text () {
-  # remove all whitespaces from start and end using regular expressions
-  local text="$1"
-  local trimmed
-  trimmed=$(echo "$text" | sed 's/^[   ]*//;s/[    ]*$//')
-  echo "$trimmed"
-}
+repo_name=$(get_stem "$REPO_URL")
 
 echo "Ensuring Euler's new environment usage"
 # this command is an alias and couldn't be executed as is, so real path is needed
@@ -49,7 +24,7 @@ echo "Enabling GCC and Python modules"
 module load "gcc/$GCC_VERSION"
 module load "python/$PYTHON_VERSION"
 
-venv_name=$(trim_text $VENV_NAME)
+venv_name=$(trim_text "$VENV_NAME")
 venv_path="$HOME/$venv_name"
 echo "Attempting to create a new Python virtual environment at path: $venv_path"
 
@@ -71,7 +46,7 @@ if [ -d "$venv_path" ]; then
 fi
 echo "Python virtual environment is in order"
 
-ch_folder=$(trim_text $CH_FOLDER)
+ch_folder=$(trim_text "$CH_FOLDER")
 ch_path="$HOME/$ch_folder"
 
 if [ -d "$ch_path" ]; then
@@ -81,7 +56,7 @@ if [ -d "$ch_path" ]; then
       # git -C is for executing command without changing the working directory
       rm -rf "$ch_path"
       mkdir "$ch_path"
-      git -C "$ch_path" clone $REPO_URL -b develop --single-branch
+      git -C "$ch_path" clone "$REPO_URL" -b develop --single-branch
     else
       echo "Did not get positive (Y) answer, exiting"
       exit 1
@@ -101,7 +76,7 @@ pip install -r "$ch_path/$repo_name/euler_requirements.txt"
 # install this script's requirements for Python; they shouldn't interfere
 pip install -r "$SCRIPT_DIR/requirements.txt"
 
-data_folder=$(trim_text $DATA_FOLDER)
+data_folder=$(trim_text "$DATA_FOLDER")
 yaml_cfg="$ch_path/$repo_name/config.yml"
 yaml_w="$SCRATCH/$ch_folder/$repo_name/cache"
 yaml_d="$HOME/$data_folder"
