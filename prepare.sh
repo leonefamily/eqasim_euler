@@ -110,5 +110,7 @@ yaml_f="$SCRATCH/$ch_folder/$repo_name/flowchart.json"
 echo "Working directory for simulations is $yaml_w"
 echo "Data for synthesis should be located at $yaml_d"
 echo "Flowchart will be created at $yaml_f"
-python -m "$SCRIPT_DIR/edit_config.py" -i "$yaml_cfg" -o "$yaml_cfg" -w "$yaml_w" -d "$yaml_d" -f "$yaml_f"
+python "$SCRIPT_DIR/edit_config.py" -i "$yaml_cfg" -o "$yaml_cfg" -w "$yaml_w" -d "$yaml_d" -f "$yaml_f"
 echo "Configuration is edited and is placed to $yaml_cfg"
+
+printf "\n--------- Preparations done! ---------\n"

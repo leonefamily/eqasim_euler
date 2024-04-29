@@ -25,7 +25,7 @@ This program is used to transfer files and edit directories
    ![img3.png](img/img3.png)
    - Wait until file transfer finishes
 5. Once required files are on the Euler cluster, log in to Euler through SSH/PuTTY using Terminal/Command line:
-   - To quickly set up requirements run `./eqasim_euler/prepare.sh`\
+   - To quickly set up requirements run `chmod u+x ./eqasim_euler/prepare.sh;./eqasim_euler/prepare.sh`\
    _Be aware, that shortcuts for copying and pasting in Linux Terminals are `Ctrl+Shift+C` and `Ctrl+Shift+V`. Hitting `Ctrl+C` while centered in the Terminal will interrupt any program that is currently running!_
    - Python virtual environment will be in `venv` folder in your home directory
    - Eqasim repository will be set up in `ch/ch_zh_synpp` directory
