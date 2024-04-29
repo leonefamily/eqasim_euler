@@ -1,5 +1,11 @@
 #!/bin/bash
-# @leonefamily
+# @author : leonefamily
+
+# * * * * * * * * * * * * * * * * * * * * * * *
+# * !! AVOID EMPTY VARIABLES AT ALL COSTS !!  *
+# *  You may accidentally nuke your home di-  *
+# * !!        rectory into oblivion       !!  *
+# * * * * * * * * * * * * * * * * * * * * * * *
 
 # exit on any error
 set -e
@@ -14,8 +20,17 @@ VENV_NAME="venv"
 CH_FOLDER="ch"
 # Remote Eqasim's repository URL
 REPO_URL="https://gitlab.ethz.ch/ivt-vpl/populations/ch-zh-synpop.git"
+# Get the location of this script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Name of folder with data for simulation
+DATA_FOLDER="switzerland_data"
 
-env2lmod="/cluster/apps/local/env2lmod.sh"
+# extract repository name from the last part independently on the fact whether it ends with .git or not
+repo_name=$(basename $REPO_URL | sed 's/\.git$//')
+if [ -z "$repo_name" ]; then
+  echo "Repository name couldn't be extracted. Invalid repository URL?"
+  exit 1
+fi
 
 trim_text () {
   # remove all whitespaces from start and end using regular expressions
@@ -26,6 +41,8 @@ trim_text () {
 }
 
 echo "Ensuring Euler's new environment usage"
+# this command is an alias and couldn't be executed as is, so real path is needed
+env2lmod="/cluster/apps/local/env2lmod.sh"
 $env2lmod
 
 echo "Enabling GCC and Python modules"
@@ -62,7 +79,8 @@ if [ -d "$ch_path" ]; then
   read -r answer
     if [ "$answer" = 'Y' ]; then
       # git -C is for executing command without changing the working directory
-      rm -rf "${ch_path:?}/*"
+      rm -rf "$ch_path"
+      mkdir "$ch_path"
       git -C "$ch_path" clone $REPO_URL -b develop --single-branch
     else
       echo "Did not get positive (Y) answer, exiting"
@@ -78,4 +96,19 @@ fi
 
 echo "Activating Python environment"
 source "$venv_path/bin/activate"
-pip install -r "$ch_path/ch-zh-synpop/euler_requirements.txt"
+pip install -r "$ch_path/$repo_name/euler_requirements.txt"
+
+# install this script's requirements for Python; they shouldn't interfere
+pip install -r "$SCRIPT_DIR/requirements.txt"
+
+data_folder=$(trim_text $DATA_FOLDER)
+yaml_cfg="$ch_path/$repo_name/config.yml"
+yaml_w="$SCRATCH/$ch_folder/$repo_name/cache"
+yaml_d="$HOME/$data_folder"
+yaml_f="$SCRATCH/$ch_folder/$repo_name/flowchart.json"
+
+echo "Working directory for simulations is $yaml_w"
+echo "Data for synthesis should be located at $yaml_d"
+echo "Flowchart will be created at $yaml_f"
+python -m "$SCRIPT_DIR/edit_config.py" -i "$yaml_cfg" -o "$yaml_cfg" -w "$yaml_w" -d "$yaml_d" -f "$yaml_f"
+echo "Configuration is edited and is placed to $yaml_cfg"
