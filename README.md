@@ -16,8 +16,8 @@ This program is used to transfer files and edit directories
    - _Password_: as in your ETH email
    - _Port_: 22 should work
    - Then hit _Quickconnect_\
-   ![img2.png](img/img2.png)\
-   - _Note: you must have already logged in through SSH/PuTTY at least once and accepted Euler's terms and conditions_
+   ![img2.png](img/img2.png)
+   _Note: you must have already logged in through SSH/PuTTY at least once and accepted Euler's terms and conditions_
 4. Upload folder with synthesis data to your home folder on Euler cluster
    - On Euler your home folder is at `/cluster/home/your_username`, where `your_username` is the user name you used to log in to Euler
    - Click at this folder on the right, its default contents will appear in the bottom 
