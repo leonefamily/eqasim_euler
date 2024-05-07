@@ -3,6 +3,7 @@
 
 # exit on any error
 set -e
+set -x
 
 # Get the location of this script and jump to its location
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -66,13 +67,30 @@ if [ -d "$ch_path" ]; then
     echo "Creating directory $ch_path"
     mkdir "$ch_path"
     git init "$ch_path"
-    git -C "$ch_path" clone $REPO_URL -b develop --single-branch
+    git -C "$ch_path" clone "$REPO_URL" -b develop --single-branch
 fi
 
 echo "Activating Python environment"
 source "$venv_path/bin/activate"
 pip install -r "$ch_path/$repo_name/euler_requirements.txt"
 
+echo "Installed Euler requirements"
+# account for synpp dependency if missing
+# Run pip freeze and store the output in a temporary file
+pip freeze > "$SCRIPT_DIR/temp_file"
+grep_cmd="/usr/bin/grep"
+synpp_string=$(grep_cmd synpp "$SCRIPT_DIR/temp_file")
+
+echo "Got synpp_string: $synpp_string"
+
+if [ -n "$synpp_string" ]; then
+    echo "synpp is installed"
+  else
+    echo "synpp is still not installed, fixing"
+    pip install "synpp==1.5.1"
+fi
+
+echo "Installing this script's requirements"
 # install this script's requirements for Python; they shouldn't interfere
 pip install -r "$SCRIPT_DIR/requirements.txt"
 
@@ -87,5 +105,8 @@ echo "Data for synthesis should be located at $yaml_d"
 echo "Flowchart will be created at $yaml_f"
 python "$SCRIPT_DIR/edit_config.py" -i "$yaml_cfg" -o "$yaml_cfg" -w "$yaml_w" -d "$yaml_d" -f "$yaml_f"
 echo "Configuration is edited and is placed to $yaml_cfg"
+
+echo "Creating run's folders"
+mkdir -p "$SCRATCH/$ch_folder/$repo_name/cache"
 
 printf "\n--------- Preparations done! ---------\n"
