@@ -3,7 +3,6 @@
 
 # exit on any error
 set -e
-set -x
 
 # Get the location of this script and jump to its location
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -78,8 +77,10 @@ echo "Installed Euler requirements"
 # account for synpp dependency if missing
 # Run pip freeze and store the output in a temporary file
 pip freeze > "$SCRIPT_DIR/temp_file"
+
+# otherwise grep just silently crashes, as this is an alias
 grep_cmd="/usr/bin/grep"
-synpp_string=$(grep_cmd synpp "$SCRIPT_DIR/temp_file")
+synpp_string=$($grep_cmd synpp "$SCRIPT_DIR/temp_file")
 
 echo "Got synpp_string: $synpp_string"
 
@@ -87,8 +88,10 @@ if [ -n "$synpp_string" ]; then
     echo "synpp is installed"
   else
     echo "synpp is still not installed, fixing"
-    pip install "synpp==1.5.1"
+    pip install "synpp"
 fi
+
+rm "$SCRIPT_DIR/temp_file"
 
 echo "Installing this script's requirements"
 # install this script's requirements for Python; they shouldn't interfere
