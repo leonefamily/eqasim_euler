@@ -112,4 +112,61 @@ echo "Configuration is edited and is placed to $yaml_cfg"
 echo "Creating run's folders"
 mkdir -p "$SCRATCH/$ch_folder/$repo_name/cache"
 
+
+# I) Ensure the target directory is there
+environment_directory="$ch_path/$repo_name/environment"
+
+if [ ! -d "${environment_directory}" ]; then
+    echo "Creating target directory: ${environment_directory}"
+    mkdir -p "${environment_directory}"
+else
+    echo "Target directory already exists: ${environment_directory}"
+fi
+
+cd "${environment_directory}"
+
+# II) Downloads
+
+## II.2) Download JDK
+if [ "$(sha256sum jdk.tar.gz)" == "${JDK_SHA256}  jdk.tar.gz" ]; then
+    echo "OpenJDK ${JDK_VERSION} already downloaded."
+else
+    echo "Downloading OpenJDK ${JDK_VERSION} ..."
+    rm -rf jdk_installed
+    curl -L -o jdk.tar.gz "${JDK_URL}"
+fi
+
+## II.3) Download Maven
+if [ "$(sha512sum maven.tar.gz)" == "${MAVEN_SHA512}  maven.tar.gz" ]; then
+    echo "Maven ${MAVEN_VERSION} already downloaded."
+else
+    echo "Maven ${MAVEN_VERSION} ..."
+    rm -rf maven_installed
+    curl -o maven.tar.gz "${MAVEN_URL}"
+fi
+
+# III) Install everything
+
+# III.3) Install OpenJDK
+if [ -f jdk_installed ]; then
+    echo "OpenJDK ${JDK_VERSION} is already installed."
+else
+    echo "Installing OpenJDK ${JDK_VERSION} ..."
+    mkdir -p jdk
+    tar xz -C jdk --strip=1 -f jdk.tar.gz
+    touch jdk_installed
+fi
+
+# III.4) Install Maven
+if [ -f maven_installed ]; then
+    echo "Maven ${MAVEN_VERSION} is already installed."
+else
+    echo "Installing Maven ${MAVEN_VERSION} ..."
+    PATH="${environment_directory}/jdk/bin:$PATH"
+    JAVA_HOME="${environment_directory}/jdk"
+    mkdir -p maven
+    tar xz -C maven --strip=1 -f maven.tar.gz
+    touch maven_installed
+fi
+
 printf "\n--------- Preparations done! ---------\n"
